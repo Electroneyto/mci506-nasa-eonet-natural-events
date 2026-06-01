@@ -1,9 +1,10 @@
-
 import hashlib
-from typing import Any, Optional, Tuple
-import pandas as pd
-from pathlib import Path
 from datetime import datetime, timezone
+from pathlib import Path
+from typing import Any, Optional, Tuple
+
+import pandas as pd
+
 
 def build_event_geometry_key(
     event_id: str,
@@ -13,11 +14,24 @@ def build_event_geometry_key(
 ) -> str:
     """
     Construye una llave única para identificar cada combinación de evento,
-    categoría, fecha de geometría y coordenadas.
+    fecha de geometría y coordenadas.
 
     Esta llave se usará después en BigQuery para evitar duplicados en Silver.
     """
     raw_key = f"{event_id}|{geometry_date}|{longitude}|{latitude}"
+    return hashlib.md5(raw_key.encode("utf-8")).hexdigest()
+
+
+def build_event_source_key(
+    event_id: str,
+    source_id: str,
+    source_url: str,
+) -> str:
+    """
+    Construye una llave única para identificar la relación entre un evento
+    y una fuente de información.
+    """
+    raw_key = f"{event_id}|{source_id}|{source_url}"
     return hashlib.md5(raw_key.encode("utf-8")).hexdigest()
 
 
@@ -26,13 +40,13 @@ def get_polygon_centroid(coordinates: Any) -> Tuple[Optional[float], Optional[fl
     Calcula un centroide simple para geometrías Polygon.
 
     NASA EONET puede devolver geometrías tipo Point o Polygon.
-    Para el dashboard, necesitamos una latitud y longitud representativa.
+    Para el dashboard, necesitamos una longitud y latitud representativa.
     """
     try:
         points = coordinates[0]
 
-        longitudes = [point[0] for point in points if len(point) >= 2]
-        latitudes = [point[1] for point in points if len(point) >= 2]
+        longitudes = [point[0] for point in points if isinstance(point, list) and len(point) >= 2]
+        latitudes = [point[1] for point in points if isinstance(point, list) and len(point) >= 2]
 
         if not longitudes or not latitudes:
             return None, None
@@ -46,18 +60,23 @@ def get_polygon_centroid(coordinates: Any) -> Tuple[Optional[float], Optional[fl
         return None, None
 
 
-def save_to_parquet(df: pd.DataFrame, name: str) -> Path:
+def save_to_parquet(df: pd.DataFrame, entity_name: str) -> Path:
     """
-    Guarda el DataFrame extraído como archivo Parquet local.
+    Guarda un DataFrame como archivo Parquet local en la capa Bronze.
 
-    El archivo se guarda en la ruta data/bronze/eonet/events, simulando
-    la estructura que luego será cargada a Google Cloud Storage.
+    Cada entidad se guarda en su propia carpeta:
+
+    - data/bronze/eonet/events/
+    - data/bronze/eonet/sources/
+    - data/bronze/eonet/geometry/
+
+    Esta estructura luego se replica en Google Cloud Storage.
     """
-    output_dir = Path("data/bronze/eonet/events")
+    output_dir = Path(f"data/bronze/eonet/{entity_name}")
     output_dir.mkdir(parents=True, exist_ok=True)
 
     timestamp = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")
-    output_path = output_dir / f"eonet_{name}_{timestamp}.parquet"
+    output_path = output_dir / f"eonet_{entity_name}_{timestamp}.parquet"
 
     df.to_parquet(output_path, index=False)
 
