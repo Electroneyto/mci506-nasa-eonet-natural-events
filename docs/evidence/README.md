@@ -14,12 +14,18 @@ Hasta este punto se completaron:
 
 | Archivo | Descripción |
 |---|---|
-| `01_gcs_bucket_bronze.png` | Bucket usado para almacenar la capa Bronze |
-| `02_gcs_bronze_eonet_structure.png` | Estructura `bronze/eonet/` en GCS |
-| `03_gcs_events_parquet.png` | Archivo Parquet de `events` cargado en GCS |
-| `04_gcs_sources_parquet.png` | Archivo Parquet de `sources` cargado en GCS |
-| `05_gcs_geometry_parquet.png` | Archivo Parquet de `geometry` cargado en GCS |
-| `06_bigquery_datasets.png` | Datasets creados en BigQuery |
+| `01_gcs_bucket_bronze.png` 
+![image](images/01_gcs_bucket_bronze.png) | Bucket usado para almacenar la capa Bronze |
+| `02_gcs_bronze_eonet_structure.png` 
+![image](images/02_gcs_bronze_eonet_structure.png)  | Estructura `bronze/eonet/` en GCS |
+| `03_gcs_events_parquet.png` 
+![image](images/03_gcs_events_parquet.png) | Archivo Parquet de `events` cargado en GCS |
+| `04_gcs_sources_parquet.png` 
+![image](images/04_gcs_sources_parquet.png)  | Archivo Parquet de `sources` cargado en GCS |
+| `05_gcs_geometry_parquet.png` 
+![image](images/05_gcs_geometry_parquet.png)  | Archivo Parquet de `geometry` cargado en GCS |
+| `06_bigquery_datasets.png` 
+![image](images/06_bigquery_datasets.png) | Datasets creados en BigQuery |
 | `07_github_pull_requests.png` | Pull Requests realizados por el equipo |
 | `08_github_actions_pipeline.png` | Workflow de GitHub Actions configurado |
 
