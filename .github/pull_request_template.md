@@ -1,68 +1,79 @@
-## Descripción del cambio
+## Descripcion del cambio
 
-En este Pull Request se agrega la estructura inicial del proyecto **NASA EONET Natural Events Data Pipeline**.
+## 🎯 Objetivo
+Generar documentación completa y educativa del pipeline de datos NASA EONET 
+que responda a las 7 preguntas clave de ingeniería de datos.
 
-El objetivo de este primer cambio es dejar preparado el repositorio base para desarrollar el pipeline de datos automatizado usando Python, Google Cloud Storage, BigQuery, GitHub Actions y Looker Studio.
+## ✨ Cambios Realizados
 
-## Parte del proyecto trabajada
+### 1. README.md Expandido (+823 líneas)
+Se reescribió completamente el README con:
 
-- [x] Estructura inicial del proyecto
-- [x] Archivos base para scripts Python
-- [x] Archivos base para consultas SQL de BigQuery
-- [x] Carpeta para documentación y evidencias
-- [x] Carpeta para GitHub Actions
-- [x] Archivo `.env.example`
-- [x] Archivo `requirements.txt`
-- [x] Plantilla de Pull Request
+#### Secciones Principales (7 preguntas):
+- **¿QUÉ datos extrae?** 
+  - 3 entidades: EVENTS (~2-5k registros), GEOMETRY (coords), SOURCES (proveedores)
+  - Especificación de campos, tipos de datos, ejemplos
 
-## Cambios realizados
+- **¿DE DÓNDE los trae?**
+  - Endpoint NASA EONET v3 con parámetros configurables
+  - Manejo de rate limits y reintentos automáticos
 
-Se crearon las carpetas principales del proyecto:
+- **¿A DÓNDE los guarda?**
+  - Arquitectura GCS → BigQuery con estructura de carpetas
+  - Variables de entorno requeridas (GCP_PROJECT_ID, GCS_BUCKET_NAME, etc.)
 
-- `scripts/`
-- `sql/`
-- `docs/`
-- `docs/evidence/`
-- `docs/dashboard_screenshots/`
-- `.github/`
-- `.github/workflows/`
+- **¿CUÁNDO se ejecuta?**
+  - Schedule GitHub Actions: Diariamente a las 3 AM UTC
+  - Fases: Extract (2-5 min) → Load (1-2 min) → Transform (3-5 min)
 
-También se agregaron los archivos base:
+- **¿CÓMO funciona?**
+  - Arquitectura Medallion completa (Bronze → Silver → Gold)
+  - Flujo detallado de EXTRACT, LOAD, TRANSFORM con código de ejemplo
+  - Deduplicación con geometry_key y source_key (hashes MD5)
 
-- `scripts/extract.py`
-- `scripts/load.py`
-- `scripts/utils.py`
-- `sql/01_create_external_table.sql`
-- `sql/02_create_silver_table.sql`
-- `sql/03_silver_transform.sql`
-- `sql/04_gold_category_summary.sql`
-- `sql/05_gold_daily_events.sql`
-- `sql/06_gold_status_summary.sql`
-- `sql/07_quality_checks.sql`
-- `.github/workflows/pipeline.yml`
-- `.github/pull_request_template.md`
-- `.env.example`
-- `requirements.txt`
+- **¿CUÁNTA CALIDAD tienen?**
+  - 8 quality checks: duplicados, nulos, rangos, integridad referencial
+  - Queries SQL de ejemplo para detección de problemas
 
-## Evidencia de prueba
+- **¿SI FALLA qué hacer?**
+  - Plan de recuperación para 4 tipos de errores (API, Permisos, BigQuery, Datos)
+  - Debugging steps y checklist de recuperación
 
-Se verificó localmente que la estructura del repositorio fue creada correctamente desde VS Code y la terminal.
+#### Características Adicionales:
+- Tabla de contenidos con links internos
+- Diagramas ASCII del flujo de datos
+- Ejemplos de código Python y SQL
+- Estructura del proyecto documentada
+- Guía de inicio rápido
+- Referencias a documentación oficial
 
-También se revisó que los archivos base estén organizados según la arquitectura del proyecto:
+### 2. .env.example
+- Creado archivo de template para variables de entorno
+- Facilita setup inicial para nuevos desarrolladores
 
-```text
-NASA EONET API
-→ Python scripts
-→ Google Cloud Storage
-→ BigQuery Bronze / Silver / Gold
-→ Looker Studio
-```
+### 3. Formato de Archivos
+- `docs/architecture.md.txt` → `docs/architecture.md` (formato correcto)
+- `docs/evidence/README.md.txt` → `docs/evidence/README.md` (formato correcto)
 
-## Checklist antes de hacer merge
+## 🎓 Contexto Académico
+Este proyecto es del Módulo 5 - Ingeniería de Datos de la Maestría en Ciencia de Datos.
+La documentación demuestra:
+- ✅ Integración con APIs públicas
+- ✅ ETL automatizado con Python
+- ✅ Diseño de data warehouse (medallion architecture)
+- ✅ Quality assurance en datos
+- ✅ Infrastructure as Code con GitHub Actions
+- ✅ Cloud infrastructure (GCS + BigQuery)
 
-- [x] No se subieron credenciales ni archivos JSON de Google Cloud.
-- [x] No se subieron archivos `.env`.
-- [x] Se agregó `.env.example` con las variables necesarias.
-- [x] Se agregó `requirements.txt` con las librerías base del proyecto.
-- [x] Se creó la estructura inicial para Python, SQL, documentación y GitHub Actions.
-- [x] El cambio deja preparado el repositorio para continuar con la extracción de datos desde NASA EONET.
+## 📊 Impacto
+- **Onboarding**: Nueva documentación facilita que otros estudiantes entiendan el proyecto
+- **Mantenibilidad**: Especificación clara de arquitectura y flujos
+- **Debugging**: Plan de recuperación detallado para casos de falla
+- **Educativo**: Ejemplos prácticos de cada componente del pipeline
+
+## ✅ Validación
+- [x] README válido en Markdown
+- [x] Links internos funcionan
+- [x] Variables de entorno documentadas
+- [x] Estructura de carpetas clara
+- [x] Ejemplos de código correctos
