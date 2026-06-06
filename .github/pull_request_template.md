@@ -1,75 +1,41 @@
-## Descripcion del cambio
+## 📊 Descripción del cambio
+Creación de dashboard analítico en Looker Studio con visualizaciones y evidencias de los datos Gold de BigQuery.
 
 ## 🎯 Objetivo
-Generar documentación completa y educativa del pipeline de datos NASA EONET 
-que responda a las 7 preguntas clave de ingeniería de datos.
+Desarrollar un dashboard interactivo que visualice los datos procesados del pipeline NASA EONET desde las tablas Gold.
 
-## ✨ Cambios Realizados
+## ✨ Cambios Realizados en carpeta `docs/dashboard_screenshots/`
 
-### 1. README.md Expandido (+823 líneas)
-Se reescribió completamente el README con:
+### 1. Dashboard Looker Studio
+- Dashboard interactivo conectado a tablas Gold de BigQuery:
+  - `eonet_gold.gold_category_summary`
+  - `eonet_gold.gold_daily_events`
+  - `eonet_gold.gold_status_summary`
+  - `eonet_gold.quality_checks`
 
-#### Secciones Principales (7 preguntas):
-- **¿QUÉ datos extrae?** 
-  - 3 entidades: EVENTS (~2-5k registros), GEOMETRY (coords), SOURCES (proveedores)
-  - Especificación de campos, tipos de datos, ejemplos
+### 2. Visualizaciones Incluidas
+- **Eventos por categoría** - Resumen de eventos naturales agrupados por tipo (Wildfires, Huracanes, etc.)
+- **Eventos por día** - Serie temporal de eventos desde tabla Gold
+- **Estado de eventos** - Conteo de eventos abiertos vs cerrados
+- **Filtros interactivos** - Filtro dinámico por categoría para análisis detallado
+- **Validaciones de calidad** - Tabla con status de quality checks
 
-- **¿DE DÓNDE los trae?**
-  - Endpoint NASA EONET v3 con parámetros configurables
-  - Manejo de rate limits y reintentos automáticos
+### 3. Evidencias Documentadas
+- `01_looker_dashboard_general.png` - Vista general del dashboard
+- `02_looker_category_filter.png` - Filtro por categoría aplicado
+- `03_looker_daily_events.png` - Gráfico de eventos por día
+- `04_looker_status_summary.png` - Eventos abiertos y cerrados
+- `05_looker_quality_checks.png` - Tabla de validaciones de datos
 
-- **¿A DÓNDE los guarda?**
-  - Arquitectura GCS → BigQuery con estructura de carpetas
-  - Variables de entorno requeridas (GCP_PROJECT_ID, GCS_BUCKET_NAME, etc.)
+### 4. Documentación
+- `readme_dashboard.md` - Explicación técnica del dashboard y fuentes de datos
+- Link al dashboard: https://datastudio.google.com/s/v_kGf_RZJyo
 
-- **¿CUÁNDO se ejecuta?**
-  - Schedule GitHub Actions: Diariamente a las 3 AM UTC
-  - Fases: Extract (2-5 min) → Load (1-2 min) → Transform (3-5 min)
-
-- **¿CÓMO funciona?**
-  - Arquitectura Medallion completa (Bronze → Silver → Gold)
-  - Flujo detallado de EXTRACT, LOAD, TRANSFORM con código de ejemplo
-  - Deduplicación con geometry_key y source_key (hashes MD5)
-
-- **¿CUÁNTA CALIDAD tienen?**
-  - 8 quality checks: duplicados, nulos, rangos, integridad referencial
-  - Queries SQL de ejemplo para detección de problemas
-
-- **¿SI FALLA qué hacer?**
-  - Plan de recuperación para 4 tipos de errores (API, Permisos, BigQuery, Datos)
-  - Debugging steps y checklist de recuperación
-
-#### Características Adicionales:
-- Tabla de contenidos con links internos
-- Diagramas ASCII del flujo de datos
-- Ejemplos de código Python y SQL
-- Estructura del proyecto documentada
-- Guía de inicio rápido
-- Referencias a documentación oficial
-
-### 2. .env.example
-- Creado archivo de template para variables de entorno
-- Facilita setup inicial para nuevos desarrolladores
-
-### 3. Formato de Archivos
-- `docs/architecture.md.txt` → `docs/architecture.md` (formato correcto)
-- `docs/evidence/README.md.txt` → `docs/evidence/README.md` (formato correcto)
-
-## 🎓 Contexto Académico
-Este proyecto es del Módulo 5 - Ingeniería de Datos de la Maestría en Ciencia de Datos.
-La documentación demuestra:
-- ✅ Integración con APIs públicas
-- ✅ ETL automatizado con Python
-- ✅ Diseño de data warehouse (medallion architecture)
-- ✅ Quality assurance en datos
-- ✅ Infrastructure as Code con GitHub Actions
-- ✅ Cloud infrastructure (GCS + BigQuery)
-
-## 📊 Impacto
-- **Onboarding**: Nueva documentación facilita que otros estudiantes entiendan el proyecto
-- **Mantenibilidad**: Especificación clara de arquitectura y flujos
-- **Debugging**: Plan de recuperación detallado para casos de falla
-- **Educativo**: Ejemplos prácticos de cada componente del pipeline
+## � Impacto
+- **Visualización**: Dashboard interactivo para análisis de eventos naturales en tiempo real
+- **Trazabilidad**: Evidencia visual de la capa Gold del data warehouse
+- **Insights**: Análisis rápido de eventos por categoría, fecha y estado
+- **Documentación**: Referencias claras a las fuentes de datos en BigQuery
 
 ## ✅ Validación
 - [x] README válido en Markdown
