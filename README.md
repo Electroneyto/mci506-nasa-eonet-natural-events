@@ -1,5 +1,13 @@
 # 🌍 NASA EONET Natural Events - Events Data Pipeline
 
+## Integrantes del grupo:
+
+* **Carlos Andres Calderon Rengifo**
+* **Miguel Angel Lozada Torrico**
+* **Roger Gabriel Ramos Ruiz**
+
+---
+---
 ## Descripción del proyecto
 
 Este proyecto implementa un pipeline de datos automatizado y documentado utilizando la API pública NASA EONET como fuente principal.
@@ -12,14 +20,14 @@ El objetivo del proyecto es extraer datos desde una fuente pública, almacenarlo
 
 ## 📋 Tabla de Contenidos
 
-1. [¿Qué datos extrae?](#-qué-datos-extrae)
-2. [¿De dónde los trae?](#-de-dónde-los-trae)
-3. [¿A dónde los guarda?](#-a-dónde-los-guarda)
-4. [¿Cuándo se ejecuta?](#-cuándo-se-ejecuta)
-5. [¿Cómo funciona?](#-cómo-funciona)
-6. [¿Cuánta calidad tienen?](#-cuánta-calidad-tienen)
-7. [Si falla, qué hacer?](#-si-falla-qué-hacer)
-8. [Stack utilizado](#-stack-utilizado)
+1. [¿Qué datos extrae?](#1-qué-datos-extrae)
+2. [¿De dónde los trae?](#2-de-dónde-los-trae)
+3. [¿A dónde los guarda?](#3-a-dónde-los-guarda)
+4. [¿Cuándo se ejecuta?](#4-cuándo-se-ejecuta)
+5. [¿Cómo funciona?](#5-cómo-funciona)
+6. [¿Cuánta calidad tienen?](#6-ccuánta-calidad-tienen)
+7. [Si falla, qué hacer?](#7-si-falla-qué-hacer)
+8. [Stack utilizado](#8-stack-utilizado)
 9. [Estructura del Proyecto](#-estructura-del-proyecto)
 10. [Ejecución Local](#-ejecución-local)
 11. [Consultas BigQuery](#-consultas-bigquery)
@@ -33,7 +41,7 @@ El objetivo del proyecto es extraer datos desde una fuente pública, almacenarlo
 
 ---
 
-## 1️⃣ ¿QUÉ datos extrae?
+## 1 ¿Qué datos extrae?
 
 ### Dataset: Eventos Naturales Globales
 
@@ -106,7 +114,7 @@ El pipeline extrae información sobre **eventos naturales ocurridos en el planet
 
 ---
 
-## 2️⃣ ¿DE DÓNDE los trae?
+## 2 ¿De dónde los trae?
 
 ### Fuente: API Pública NASA EONET v3
 
@@ -157,7 +165,7 @@ La API devuelve:
 
 ---
 
-## 3️⃣ ¿A DÓNDE los guarda?
+## 3 ¿A dónde los guarda?
 
 ### Arquitectura de Almacenamiento
 
@@ -225,9 +233,9 @@ gs://your-bucket/
 
 ---
 
-## 4️⃣ ¿CUÁNDO se ejecuta?
+## 4 ¿Cuándo se ejecuta?
 
-### Ejecución: GitHub Actions (En desarrollo)
+### Ejecución: GitHub Actions
 
 #### Schedule Planeado
 
@@ -299,7 +307,7 @@ bq query --use_legacy_sql=false < sql/07_quality_checks.sql
 
 ---
 
-## 5️⃣ ¿CÓMO funciona?
+## 5 ¿Cómo funciona?
 
 ### Arquitectura Medallion: Bronze → Silver → Gold
 
@@ -473,7 +481,7 @@ OPTIONS (
 
 ---
 
-## 6️⃣ ¿CUÁNTA CALIDAD tienen?
+## 6 Ccuánta calidad tienen?
 
 ### Validaciones de Datos - `sql/07_quality_checks.sql`
 
@@ -580,7 +588,7 @@ Un estado `FAIL` indica un problema que debe revisarse.
 ---
 
 
-## 7️⃣ ¿SI FALLA qué hacer?
+## 7 ¿Si falla qué hacer?
 
 ### Plan de Recuperación
 
@@ -709,113 +717,7 @@ Posibles causas:
 * External Tables sin acceso a archivos.
 * Cambios en el esquema de los Parquet.
 * Problemas de permisos en BigQuery.
-* Scheduled Query desactivada o con errores.
-
-Acciones:
-
-* Ejecutar manualmente el SQL con error.
-* Revisar el historial de ejecuciones de la Scheduled Query.
-* Validar conteos de Bronze, Silver y Gold.
-* Revisar la tabla `quality_checks`.
-
-
-**Debugging**:
-```bash
-# 1. Inspeccionar esquema de tablas
-bq show --schema eonet.bronze_events
-
-# 2. Ejecutar quality check
-bq query --use_legacy_sql=false < sql/07_quality_checks.sql
-
-# 3. Ver últimos errores
-bq ls -j -a | head -10
-bq wait JOB_ID
-```
-
-**Solución**:
-```sql
--- Recrear tabla bronze con tipos correctos
-DROP TABLE IF EXISTS eonet.bronze_events;
-
-CREATE OR REPLACE EXTERNAL TABLE eonet.bronze_events (
-    event_id STRING,
-    event_name STRING,
-    event_date TIMESTAMP,
-    longitude FLOAT64,
-    latitude FLOAT64
-)
-OPTIONS (
-    format = 'PARQUET',
-    uris = ['gs://bucket/bronze/eonet/events/*.parquet']
-);
-```
-
----
-
-#### 🔴 **Tipo 4: Datos inconsistentes (Validation FAIL)**
-
-**Síntomas**:
-```
-QC1_geometry_duplicates: FAIL (500 duplicates found)
-QC4_invalid_coordinates: FAIL (25 records outside range)
-```
-
-**Debugging**:
-```sql
--- Identificar duplicados
-SELECT 
-    geometry_key, 
-    COUNT(*) as cnt
-FROM silver_geometry
-GROUP BY geometry_key
-HAVING cnt > 1
-ORDER BY cnt DESC;
-
--- Identificar coords inválidas
-SELECT *
-FROM silver_geometry
-WHERE latitude NOT BETWEEN -90 AND 90
-   OR longitude NOT BETWEEN -180 AND 180;
-```
-
-**Solución**:
-```sql
--- Opción 1: Descartar duplicados (RECOMENDADO)
-CREATE OR REPLACE TABLE eonet.silver_geometry AS
-SELECT 
-    * EXCEPT(rn)
-FROM (
-    SELECT *,
-        ROW_NUMBER() OVER (PARTITION BY geometry_key ORDER BY ingestion_timestamp DESC) as rn
-    FROM eonet.silver_geometry
-)
-WHERE rn = 1;
-
--- Opción 2: Investigar fuente de duplicados
-SELECT event_id, ingestion_timestamp, COUNT(*)
-FROM silver_geometry
-WHERE geometry_key IN (...)
-GROUP BY event_id, ingestion_timestamp;
-```
-
----
-
-#### 📋 **Checklist de Recuperación**
-
-```markdown
-## Si el pipeline falla:
-
-- [ ] ¿Cuál es el error exacto? (revisar GitHub Actions log)
-- [ ] ¿En qué fase falló? (Extract / Load / Transform)
-- [ ] ¿Cuándo fue la última ejecución exitosa?
-- [ ] ¿Hay datos parciales en GCS?
-
-## Acciones:
-
-- [ ] 1. Revisar logs en: GitHub → Actions → Pipeline run
-- [ ] 2. Ejecutar manualmente: `python scripts/extract.py`
-- [ ] 3. Si extract OK → probar `python scripts/load.py`
-- [ ] 4. Si load OK → ejecutar quality checks en BigQuery
+* Sch- [ ] 4. Si load OK → ejecutar quality checks en BigQuery
 - [ ] 5. Si quality checks fallan → ejecutar Tipo 4 (arriba)
 - [ ] 6. Si todo OK pero dashboard vacío → revisar tabla GOLD
 
@@ -825,86 +727,6 @@ GROUP BY event_id, ingestion_timestamp;
 - 🔧 Para errores de GCP: revisar IAM del service account
 - 📊 Para errores de BigQuery: revisar limites de API (quota)
 ```
-
----
-
-
-#### 🔴 **Tipo 5: Fallo en Looker Studio (Dashboard vacío)**
-
-**Síntomas**:
-- Dashboard sin datos o tarjetas vacías
-- Conexión a fuente de datos mostrada como "Desconectada"
-- Errores de permisos al intentar refrescar campos
-
-Revisar:
-
-```text
-Looker Studio → Dashboard → Fuente de datos → Estado
-```
-
-Posibles causas:
-
-* Tablas Gold vacías o sin datos.
-* Campos nuevos no actualizados en Looker Studio.
-* Permisos insuficientes para acceder a BigQuery.
-* Fuente de datos desconectada.
-* Queries Gold retornando 0 registros.
-
-Acciones:
-
-* Refrescar campos en Looker Studio (Fuente de datos → Actualizar campos).
-* Revisar permisos de acceso en BigQuery IAM.
-* Confirmar que las tablas Gold tengan datos ejecutando:
-  ```sql
-  SELECT COUNT(*) as num_records FROM eonet.gold_category_summary;
-  SELECT COUNT(*) as num_records FROM eonet.gold_daily_events;
-  SELECT COUNT(*) as num_records FROM eonet.gold_status_summary;
-  ```
-* Validar que el dashboard use las tablas Gold correctas.
-* Ejecutar Scheduled Query manualmente en BigQuery.
-
-**Debugging**:
-```bash
-# 1. Verificar que las tablas existen
-bq ls -t eonet
-
-# 2. Contar registros en Gold
-bq query --use_legacy_sql=false 'SELECT COUNT(*) FROM eonet.gold_category_summary'
-
-# 3. Revisar permisos de usuario en Looker Studio
-# (Dashboard → Compartir → Verificar que tengas Editor o Propietario)
-
-# 4. Revisar logs de Scheduled Query
-bq ls -j -a | grep scheduled
-```
-
-**Solución**:
-```sql
--- Si las tablas Gold están vacías, regenerarlas
-BEGIN
-  CREATE OR REPLACE TABLE eonet.gold_category_summary AS
-  SELECT category_id, category_title, COUNT(*) as num_events
-  FROM eonet.silver_events
-  GROUP BY category_id, category_title;
-  
-  CREATE OR REPLACE TABLE eonet.gold_daily_events AS
-  SELECT DATE(event_date) as event_day, COUNT(*) as num_events
-  FROM eonet.silver_events
-  GROUP BY DATE(event_date)
-  ORDER BY event_day DESC;
-  
-  CREATE OR REPLACE TABLE eonet.gold_status_summary AS
-  SELECT event_status, COUNT(*) as num_records
-  FROM eonet.silver_events
-  GROUP BY event_status;
-END;
-
--- Luego en Looker Studio: Fuente de datos → "Actualizar campos"
-```
-
----
-
-
 
 ### 🛠️ Monitoreo Proactivo
 
@@ -931,44 +753,9 @@ tail -f logs/load_*.log
 - Alerta si quality check retorna FAIL
 ```
 
-
-
-## 📁 Estructura del Proyecto
-
-```
-mci506-nasa-eonet-natural-events/
-├── README.md                          # Este archivo
-├── requirements.txt                   # Dependencias Python
-├── utils.py                          # Funciones compartidas
-│
-├── scripts/                          # Scripts de ejecución
-│   ├── extract.py                    # Extraer desde API NASA
-│   ├── load.py                       # Cargar a GCS/BigQuery
-│   └── utils.py                      # Helpers (keys, centroides)
-│
-├── sql/                              # Queries BigQuery
-│   ├── 01_create_external_table.sql  # Tablas externas (Bronze)
-│   ├── 02_create_silver_table.sql    # Crear tabla Silver
-│   ├── 03_silver_transform.sql       # Transformaciones Silver
-│   ├── 04_gold_category_summary.sql  # Vista Gold 1
-│   ├── 05_gold_daily_events.sql      # Vista Gold 2
-│   ├── 06_gold_status_summary.sql    # Vista Gold 3
-│   └── 07_quality_checks.sql         # Validaciones
-│
-├── docs/                             # Documentación
-│   ├── architecture.md               # Diagramas arquitectura
-│   └── evidence/                     # Screenshots/evidencia
-│
-└── data/                             # (Local, no commiteado)
-    └── bronze/eonet/
-        ├── events/
-        ├── sources/
-        └── geometry/
-```
-
 ---
 
-## 8️⃣ STACK utilizado
+## 8 STACK utilizado
 
 El proyecto utiliza el stack obligatorio del módulo:
 
@@ -1038,11 +825,9 @@ export BIGQUERY_LOCATION="US"
 export GOOGLE_APPLICATION_CREDENTIALS="/path/to/service-account-key.json"
 ```
 
-### Ejecutar Pipeline Localmente (DEPRECATED - Ver Sección 10 Ejecución Local)
+### Paso a Paso
 
-## � Ejecución Local
-
-### 1️⃣ Crear entorno virtual
+#### 1️⃣ Crear entorno virtual
 
 ```bash
 python -m venv .venv
@@ -1060,13 +845,13 @@ En Linux/Mac:
 source .venv/bin/activate
 ```
 
-### 2️⃣ Instalar dependencias
+#### 2️⃣ Instalar dependencias
 
 ```bash
 pip install -r requirements.txt
 ```
 
-### 3️⃣ Ejecutar extracción
+#### 3️⃣ Ejecutar extracción
 
 Extrae datos desde la API NASA EONET y genera archivos Parquet locales:
 
@@ -1081,7 +866,7 @@ data/bronze/eonet/sources/eonet_sources_20250101_120000.parquet
 data/bronze/eonet/geometry/eonet_geometry_20250101_120000.parquet
 ```
 
-### 4️⃣ Ejecutar carga a GCS/BigQuery
+#### 4️⃣ Ejecutar carga a GCS/BigQuery
 
 Carga los Parquets a Google Cloud Storage y crea tablas externas en BigQuery:
 
@@ -1089,29 +874,17 @@ Carga los Parquets a Google Cloud Storage y crea tablas externas en BigQuery:
 python scripts/load.py
 ```
 
-### 5️⃣ Ejecutar transformaciones en BigQuery
+#### 5️⃣ Ejecutar transformaciones en BigQuery
 
-Ejecutar los SQL en el orden especificado (ver sección siguiente)
+Ejecutar las consultas SQL en el orden especificado en la siguiente sección.
 
 ---
 
 ## 🔍 Consultas BigQuery
 
-### Ejecución manual de transformaciones
+### Descripción y Orden de los Scripts
 
-Los SQL deben ejecutarse en el siguiente orden para crear la arquitectura completa:
-
-```bash
-bq query --use_legacy_sql=false < sql/01_create_external_table.sql
-bq query --use_legacy_sql=false < sql/02_create_silver_table.sql
-bq query --use_legacy_sql=false < sql/03_silver_transform.sql
-bq query --use_legacy_sql=false < sql/04_gold_category_summary.sql
-bq query --use_legacy_sql=false < sql/05_gold_daily_events.sql
-bq query --use_legacy_sql=false < sql/06_gold_status_summary.sql
-bq query --use_legacy_sql=false < sql/07_quality_checks.sql
-```
-
-### Descripción de cada paso
+Los scripts SQL de BigQuery deben ser ejecutados en el orden especificado a continuación para estructurar correctamente las capas Bronze, Silver y Gold. Para ver ejemplos de cómo ejecutarlos mediante consola usando la CLI de BigQuery (`bq query`), por favor consulta la sección [4. ¿Cuándo se ejecuta?](#-cuándo-se-ejecuta).
 
 | # | Script | Propósito |
 |---|--------|----------|
@@ -1152,6 +925,9 @@ eonet_gold.quality_checks
 https://datastudio.google.com/reporting/4548d662-e099-4494-bc01-2bb8290ee4ad
 ```
 
+
+
+
 Las evidencias del dashboard se encuentran en:
 
 ```text
@@ -1188,14 +964,14 @@ El repositorio debe estar configurado como público.
 ### Acceso GitHub
 
 ```text
-Usuario: auzaluis
+Usuario: nombre_usuario
 Rol: Collaborator
 ```
 
 ### Acceso Google Cloud
 
 ```text
-Correo: luis.auza@gmail.com
+Correo: l**********a@gmail.com
 Rol: Editor
 ```
 
@@ -1225,7 +1001,7 @@ La solución permite extraer eventos naturales desde NASA EONET, almacenarlos en
 
 ---
 
-## �📚 Referencias
+## 📚 Referencias
 
 - 🌍 [NASA EONET API Docs](https://eonet.gsfc.nasa.gov/docs/v3)
 - 🔧 [Google Cloud Storage Docs](https://cloud.google.com/storage/docs)
