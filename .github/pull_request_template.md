@@ -1,45 +1,86 @@
 ## 📊 Descripción del cambio
-Creación de dashboard analítico en Looker Studio con visualizaciones y evidencias de los datos Gold de BigQuery.
+Reorganización y mejora integral del README.md para coherencia estructural, eliminación de duplicaciones y mejor experiencia de usuario. Se consolidó toda la documentación del proyecto en un flujo lógico y coherente.
 
 ## 🎯 Objetivo
-Desarrollar un dashboard interactivo que visualice los datos procesados del pipeline NASA EONET desde las tablas Gold.
+Crear un README cohesivo, bien estructurado y fácil de seguir que guíe al usuario desde la comprensión conceptual del proyecto hasta la ejecución y troubleshooting, manteniendo coherencia visual y de contenido.
 
-## ✨ Cambios Realizados en carpeta `docs/dashboard_screenshots/`
+## ✨ Cambios Realizados
 
-### 1. Dashboard Looker Studio
-- Dashboard interactivo conectado a tablas Gold de BigQuery:
-  - `eonet_gold.gold_category_summary`
-  - `eonet_gold.gold_daily_events`
-  - `eonet_gold.gold_status_summary`
-  - `eonet_gold.quality_checks`
+### 1. Estructura Reorganizada
+- **Tabla de Contenidos actualizada**: 18 secciones organizadas lógicamente
+- **Flujo narrativo**: QUÉ → DE DÓNDE → A DÓNDE → CUÁNDO → CÓMO → CALIDAD → TROUBLESHOOTING
+- **Posicionamiento estratégico**:
+  - Stack utilizado (sección 8)
+  - Estructura del Proyecto (sección 9)
+  - Ejecución Local (sección 10)
+  - Consultas BigQuery (sección 11)
+  - Dashboard, Evidencias, Accesos, Estado Final, Conclusión (secciones 12-16)
+  - Referencias y Notas Académicas (secciones 17-18)
 
-### 2. Visualizaciones Incluidas
-- **Eventos por categoría** - Resumen de eventos naturales agrupados por tipo (Wildfires, Huracanes, etc.)
-- **Eventos por día** - Serie temporal de eventos desde tabla Gold
-- **Estado de eventos** - Conteo de eventos abiertos vs cerrados
-- **Filtros interactivos** - Filtro dinámico por categoría para análisis detallado
-- **Validaciones de calidad** - Tabla con status de quality checks
+### 2. Eliminación de Duplicaciones
+- ❌ Removida "Guía de Inicio Rápido" redundante
+- ❌ Consolidada sección duplicada de "Ejecución Local"
+- ✅ Una única sección "Ejecución Local" con 5 pasos claros y coherentes
 
-### 3. Evidencias Documentadas
-- `01_looker_dashboard_general.png` - Vista general del dashboard
-- `02_looker_category_filter.png` - Filtro por categoría aplicado
-- `03_looker_daily_events.png` - Gráfico de eventos por día
-- `04_looker_status_summary.png` - Eventos abiertos y cerrados
-- `05_looker_quality_checks.png` - Tabla de validaciones de datos
+### 3. Mejoras en Ejecución Local
+- **Paso 1️⃣**: Crear entorno virtual (con soporte Windows/Linux/Mac)
+- **Paso 2️⃣**: Instalar dependencias
+- **Paso 3️⃣**: Ejecutar extracción (con salida esperada documentada)
+- **Paso 4️⃣**: Ejecutar carga a GCS/BigQuery
+- **Paso 5️⃣**: Ejecutar transformaciones en BigQuery
+- Requisitos previos claros (variables de entorno)
 
-### 4. Documentación
-- `readme_dashboard.md` - Explicación técnica del dashboard y fuentes de datos
-- Link al dashboard: https://datastudio.google.com/s/v_kGf_RZJyo
+### 4. Mejoras en Consultas BigQuery
+- Orden de ejecución especificado con comandos `bq` completos
+- Tabla descriptiva con propósito de cada script SQL
+- Facilita ejecución manual step-by-step
 
-## � Impacto
-- **Visualización**: Dashboard interactivo para análisis de eventos naturales en tiempo real
-- **Trazabilidad**: Evidencia visual de la capa Gold del data warehouse
-- **Insights**: Análisis rápido de eventos por categoría, fecha y estado
-- **Documentación**: Referencias claras a las fuentes de datos en BigQuery
+### 5. Referencias Ampliadas
+- ✅ NASA EONET API Docs
+- ✅ Google Cloud Storage Docs
+- ✅ BigQuery Docs
+- ✅ Apache Parquet Format
+- ✨ **NEW**: Looker Studio Docs
+- ✨ **NEW**: GitHub Actions Documentation
+
+### 6. Notas Académicas Mejoradas
+- Agregado: Visualización de datos en tiempo real
+- Agregado: Monitoreo y troubleshooting de pipelines
+- Total: 8 competencias demostrables
+
+## 📋 Cambios Específicos por Sección
+
+| Sección | Cambio |
+|---------|--------|
+| TOC | Actualizado de 15 a 18 items |
+| Stack | Mantiene formato de tabla (sin cambios) |
+| Estructura | Movida a sección 9 (antes al final) |
+| Ejecución | Consolidada en 5 pasos numerados |
+| BigQuery | Ahora con tabla descriptiva |
+| Referencias | +2 nuevas referencias |
+| Notas Académicas | +2 tópicos nuevos |
+
+## 🎨 Mantenimiento de Formato
+- ✅ Uso consistente de emojis descriptivos
+- ✅ Separadores `---` entre secciones
+- ✅ Niveles de encabezados jerárquicos
+- ✅ Tablas Markdown para datos estructurados
+- ✅ Bloques de código con lenguaje especificado
+- ✅ Listas ordenadas y desordenadas apropiadas
+
+## 🚀 Impacto
+- **Legibilidad**: Estructura lógica mejora comprensión
+- **Mantenibilidad**: Eliminación de duplicaciones facilita actualizaciones futuras
+- **Usuario**: Flujo claro desde conceptos a implementación
+- **Profundidad**: Cobertura completa desde QUÉ hasta TROUBLESHOOTING
+- **Referencias**: Más completo con documentación adicional
 
 ## ✅ Validación
-- [x] README válido en Markdown
+- [x] README válido en Markdown (sin caracteres especiales)
+- [x] Tabla de Contenidos completamente actualizada
+- [x] Flujo narrativo coherente
+- [x] Sin duplicaciones de contenido
+- [x] Ejemplos de código correctos
+- [x] Formato visual consistente
 - [x] Links internos funcionan
 - [x] Variables de entorno documentadas
-- [x] Estructura de carpetas clara
-- [x] Ejemplos de código correctos
